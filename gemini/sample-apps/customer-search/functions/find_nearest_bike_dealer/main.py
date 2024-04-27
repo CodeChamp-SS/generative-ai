@@ -74,7 +74,7 @@ def hello_http(request):
         generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
         generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
     }
-    model = model = GenerativeModel("gemini-1.0-pro-002")
+    model = GenerativeModel("gemini-1.0-pro-002")
     
     responses = model.generate_content(
         f"""You are a chatbot for Cymbal bank application.
@@ -91,12 +91,12 @@ def hello_http(request):
 
     final_response = ""
     for response in responses:
-        final_response += response.text 
+        final_response += response.text
         
     res = {
-        "fulfillment_response": {"messages": [{"text": {"text": [final_response.text]}}]},
+        "fulfillment_response": {"messages": [{"text": {"text": [final_response]}}]},
         "sessionInfo": {
-            "parameters": {"vehicle_type": "Bike", "showrooms": final_response.text}
+            "parameters": {"vehicle_type": "Bike", "showrooms": final_response}
         },
     }
     return res

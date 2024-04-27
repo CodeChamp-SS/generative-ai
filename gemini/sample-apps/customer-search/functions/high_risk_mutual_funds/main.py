@@ -4,10 +4,12 @@ from typing import Dict
 import functions_framework
 from google.cloud import bigquery, storage
 import vertexai
-from vertexai.language_models import TextGenerationModel
+from vertexai.generative_models import GenerativeModel, Part, FinishReason
+import vertexai.preview.generative_models as generative_models
 
 client: bigquery.Client = bigquery.Client()
 
+project_id = environ.get("PROJECT_ID")
 
 def run(name, statement):
     return name, client.query(statement).result()  # blocks the thread
@@ -122,7 +124,6 @@ def hello_http(request):
         amount_invested.append(row["amount_invested"])
 
     total_investment = 0
-    # total_mf_investment = 0
     total_high_risk_investment = 0
 
     for row in res["query_fd"]:
@@ -138,25 +139,31 @@ def hello_http(request):
         if row["total_high_risk_investment"] is not None:
             total_high_risk_investment += row["total_high_risk_investment"]
 
-    vertexai.init(project="fintech-app-gcp", location="us-central1")
-    parameters = {
-        "max_output_tokens": 512,
-        "temperature": 0.2,
-        "top_p": 0.8,
-        "top_k": 40,
+    vertexai.init(project=project_id, location="us-central1")
+    generation_config = {
+        "max_output_tokens": 2048,
+        "temperature": 1,
+        "top_p": 1,
     }
-    model = TextGenerationModel.from_pretrained("text-bison")
-    response = model.predict(
-        """You are a chatbot for bank application and you are required to briefly summarize the key insights of given numerical values as Investment Summary in small pointers.
+    safety_settings = {
+        generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    }
+    model = GenerativeModel("gemini-1.0-pro-002")
+    
+    responses = model.generate_content(
+        f"""You are a chatbot for bank application and you are required to briefly summarize the key insights of given numerical values as Investment Summary in small pointers.
 
-    Total Investment = ₹{0}
-    Investment in Fixed Deposits = ₹{4}
-    Scheme_Name = {1}
-    One_Month_Return = {2}
-    One_Month_Return_Percentage = {5}
-    TTM_Return = {3}
-    TTM_Return_Percentage = {6}
-    amount_invested = {7}
+    Total Investment = ₹{total_investment}
+    Investment in Fixed Deposits = ₹{fd_inv}
+    Scheme_Name = {scheme_name}
+    One_Month_Return = {one_month_return}
+    One_Month_Return_Percentage = {one_m}
+    TTM_Return = {ttm_return}
+    TTM_Return_Percentage = {TTM}
+    amount_invested = {amount_invested}
 
     Write in a professional and business-neutral tone.
 
@@ -182,57 +189,31 @@ def hello_http(request):
     HDFC Sensex ETF	₹17,00,000	₹2,55,000	15	₹7,65,000	45
     Nippon India Nifty 50 ETF	₹23,00,000	₹4,14,000	18	₹12,42,000	54
 
-    """.format(
-            total_investment,
-            scheme_name,
-            one_month_return,
-            ttm_return,
-            fd_inv,
-            one_m,
-            TTM,
-            amount_invested,
-        ),
-        **parameters,
+    """,
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+        stream=True,
     )
 
+    final_response = ""
+    for response in responses:
+        final_response += response.text
+        
     print("One month return -> ", one_month_return)
     print("One month return percentage -> ", one_m)
     print("TTM month return -> ", ttm_return)
     print("TTM month return percentage  -> ", TTM)
     print("Amount Invested -> ", amount_invested)
-
-    print(f"Response from Model: {response.text}")
+    print(f"Response from Model: {final_response}")
+    
 
     url = "https://storage.cloud.google.com/public_bucket_fintech_app/Market%20Summary.pdf"
     print(url)
 
-    # res = {"fulfillment_response": {"messages": [{"text": {"text": [response.text]}}]}}
     res = {
         "fulfillment_response": {
             "messages": [
-                {"text": {"text": [response.text]}},
-                # {
-                #     "payload":{
-                #         "richContent": [
-                #           [
-                #             {
-                #               "type": "chips",
-                #               "options": [
-                #                 {
-                #                   "text": "Market Summary",
-                #                   "image": {
-                #                     "rawUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/391px-PDF_file_icon.svg.png"
-                #                   },
-                #                   "anchor": {
-                #                     "href": url
-                #                   }
-                #                 },
-                #               ]
-                #             }
-                #           ]
-                #         ]
-                #     }
-                # }
+                {"text": {"text": [final_response]}},
             ]
         }
     }
