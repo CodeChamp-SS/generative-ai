@@ -12,7 +12,7 @@ client: bigquery.Client = bigquery.Client()
 project_id = environ.get("PROJECT_ID")
 
 def run(name, statement):
-    return name, client.query(statement).result()  # blocks the thread
+    return name, client.query(statement).result()
 
 
 def run_all(statements: Dict[str, str]):
@@ -41,8 +41,6 @@ def hello_http(request):
     client = bigquery.Client()
 
     customer_id = request_json["sessionInfo"]["parameters"]["cust_id"]
-    # customer_id = 235813
-    # 342345, 592783
 
     if customer_id is not None:
         print("Customer ID ", customer_id)

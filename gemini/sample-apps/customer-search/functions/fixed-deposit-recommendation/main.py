@@ -70,10 +70,7 @@ def hello_http(request):
     client = bigquery.Client()
 
     customer_id = request_json["sessionInfo"]["parameters"]["cust_id"]
-    # customer_id = 235813
-    # 342345, 592783
 
-    # get account balance of the user
     query_account_balance = f"""
     SELECT SUM(avg_monthly_bal) as total_account_balance FROM `{project_id}.DummyBankDataset.Account` where customer_id={customer_id}
     and avg_monthly_bal is NOT NULL
@@ -85,7 +82,6 @@ def hello_http(request):
       where account_id IN (SELECT account_id FROM `{project_id}.DummyBankDataset.Account` where customer_id={customer_id}) and EXTRACT(MONTH from Next_Payment_Date) = 10 and EXTRACT(YEAR from Next_Payment_Date) = 2023 and fund_transfer_amount IS NOT NULL
   """
 
-    # get the date of birth of the user
     query_dob = f"""
         SELECT date_of_birth as dob FROM `{project_id}.DummyBankDataset.Customer` where customer_id = {customer_id}
   """
@@ -121,9 +117,7 @@ def hello_http(request):
             else:
                 rate_of_interest = row["rate_of_interest"]
 
-    # for each high risk mutual fund
     for row in result_account_balance:
-        # extract the name of the mutual fund and the current amount
         if row["total_account_balance"] is not None:
             balance += row["total_account_balance"]
 
@@ -138,10 +132,6 @@ def hello_http(request):
 
     rounded_fd_amount = round_to_nearest_thousands(fd_amount)
 
-    # if balance < 200000:
-    #   result = "This is not sufficient to cover upcoming expenses of electricity for rest of the month"
-    #   output = {"fulfillment_response": {"messages": [{"text": {"text": [result]}}]}}
-    #   return output
 
     if fd_amount < 10000:
         result = "Your balance is too low for FD."

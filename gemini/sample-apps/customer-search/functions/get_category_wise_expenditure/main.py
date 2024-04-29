@@ -46,7 +46,6 @@ def hello_http(request):
     amount = []
     category = []
     transaction_list_str = ""
-    # transaction_list = []
     total_expenditure = 0
     for row in result_categories:
         amount.append(round(row["amount"], 2))
@@ -54,10 +53,7 @@ def hello_http(request):
         transaction_list_str = (
             transaction_list_str + f"{row['sub_category']}: ₹{row['amount']}\n"
         )
-        # transaction_list.append(f"{row['sub_category']}: ₹{row['amount']}\n")
         total_expenditure = total_expenditure + row["amount"]
-
-    # transaction_list_str = transaction_list_str[1:]
 
     vertexai.init(project=project_id, location="us-central1")
     generation_config = {
@@ -144,11 +140,6 @@ def hello_http(request):
                                     "title": "Last Month Expenditure",
                                     "text": transaction_list,
                                 }
-                                # {
-                                #     "type": "image",
-                                #     "rawUrl": url,
-                                #     "accessibilityText": "Example logo"
-                                # }
                             ],
                             [
                                 {

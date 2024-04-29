@@ -20,8 +20,6 @@ def hello_http(request):
     client = bigquery.Client()
 
     customer_id = request_json["sessionInfo"]["parameters"]["cust_id"]
-    # customer_id = 235813
-    # 342345, 592783
 
     if customer_id is not None:
         print("Customer ID ", customer_id)
@@ -129,8 +127,6 @@ def hello_http(request):
         safety_settings=safety_settings,
         stream=True,
     )
-    # For first 5 elements in Distances:
-    #     list the Dealer's Name, Address for the element and the discount offered to the bank's customers
 
     final_response = ""
     for response in responses:

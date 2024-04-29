@@ -13,7 +13,7 @@ client: bigquery.Client = bigquery.Client()
 
 
 def run(name, statement):
-    return name, client.query(statement).result()  # blocks the thread
+    return name, client.query(statement).result()
 
 
 def run_all(statements: Dict[str, str]):
@@ -118,7 +118,6 @@ def hello_http(request):
         amount_invested.append(row["amount_invested"])
 
     total_investment = 0
-    # total_mf_investment = 0
     total_high_risk_investment = 0
 
     for row in res["query_fd"]:
