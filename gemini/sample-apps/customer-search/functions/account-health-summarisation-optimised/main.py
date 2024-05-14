@@ -98,14 +98,14 @@ def get_ac_details(project_id: str, user_accounts: list) -> tuple:
     total_expenditure = 0
     for account in user_accounts:
         query_expenditure_details = f"""
-            SELECT SUM(transaction_amount) as expenditure FROM
-            `{project_id}.DummyBankDataset.AccountTransactions`
+            SELECT SUM(transaction_amount) as expenditure FROM "\
+            `{project_id}.DummyBankDataset.AccountTransactions` "\
             WHERE ac_id = {account} AND debit_credit_indicator = 'Debit'
         """
 
         query_income = f"""
-            SELECT SUM(transaction_amount) as income FROM
-            `{project_id}.DummyBankDataset.AccountTransactions`
+            SELECT SUM(transaction_amount) as income FROM "\
+            `{project_id}.DummyBankDataset.AccountTransactions` "\
             WHERE ac_id = {account} and debit_credit_indicator = 'Credit'
         """
 

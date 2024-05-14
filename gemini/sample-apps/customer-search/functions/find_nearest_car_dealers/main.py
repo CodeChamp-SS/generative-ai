@@ -85,7 +85,7 @@ def find_nearest_bike_dealer(request):
     for brand in car_dealers.items():
         for dealer_name, dealer_address in car_dealers[brand]:
             dist_api_url = (
-                """https://maps.googleapis.com/maps/api/distancematrix/json?
+                """https://maps.googleapis.com/maps/api/distancematrix/json?"\
                 destinations={dealer_name},"""
                 f" {dealer_address}&origins={cust_address}&key={api_key}"
             )

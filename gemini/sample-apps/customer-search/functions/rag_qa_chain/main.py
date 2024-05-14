@@ -33,7 +33,7 @@ def init_me_libs():
     if not os.path.exists("utils"):
         os.makedirs("utils")
 
-    url_prefix = """https://raw.githubusercontent.com/GoogleCloudPlatform/generative-ai
+    url_prefix = """https://raw.githubusercontent.com/GoogleCloudPlatform/generative-ai"\
     /main/language/use-cases/document-qa/utils"""
     files = ["__init__.py", "matching_engine.py", "matching_engine_utils.py"]
 
@@ -130,7 +130,7 @@ def reformat(resp):
     model = TextGenerationModel.from_pretrained("text-bison")
     response = model.predict(
         f"""
-Given the input text {0}, reformat it to make it clean and representable to be 
+Given the input text {0}, reformat it to make it clean and representable to be
 shown in HTML as search result on a website.
       """.format(
             resp
