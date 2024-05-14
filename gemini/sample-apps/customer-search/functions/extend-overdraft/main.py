@@ -73,7 +73,7 @@ def extend_overdraft(request):
           You have to offer an overdraft of {overdraft_amount} to a user at a interest rate of
           {overdraft_interest_rate}% with a processing fee of {overdraft_processing_fee}
           in no more than 40 words.
-          
+
           For example -> Based on our relationship, you are pre-approved of a.
           ₹30,000 overdraft at interest of 16% and ₹1,600. Would you like to proceed?
         """

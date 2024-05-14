@@ -40,7 +40,7 @@ class BigQueryHandler:
             "query_assets"
         ] = f"""
         SELECT sum(avg_monthly_bal) as asset FROM `{self.project_id}.DummyBankDataset.Account`
-        where customer_id = {self.customer_id} and product in ('Savings A/C ', 
+        where customer_id = {self.customer_id} and product in ('Savings A/C ',
         'Savings Salary A/C ', 'Premium Current A/C ', 'Fixed Deposit', 'Flexi Deposit');
         """
 
