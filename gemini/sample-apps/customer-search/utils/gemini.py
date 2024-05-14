@@ -1,10 +1,12 @@
+"""This is a python utility file."""
+
 # pylint: disable=E0401
 
 from os import environ
 
 import vertexai
 from vertexai.preview.generative_models import GenerativeModel
-import vertexai.preview.generative_models as generative_models
+from vertexai.preview import generative_models
 
 generation_config = {
     "max_output_tokens": 2048,
@@ -13,10 +15,14 @@ generation_config = {
 }
 
 safety_settings = {
-    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH:
+    generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT:
+    generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT:
+    generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT:
+    generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
 }
 
 
@@ -58,12 +64,12 @@ class Gemini:
             str: The generated response.
         """
 
-        response = self.model.predict(
+        responses = self.model.generate_content(
             prompt, generation_config=generation_config, safety_settings=safety_settings
         )
 
         final_response = ""
-        for response in response:
+        for response in responses:
             final_response += response.text
 
         return final_response
