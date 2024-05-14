@@ -128,7 +128,7 @@ def event_recommendation(request):
 
     Create a prompt to generate invite image for a {event_recommended["event_name_"]} event
     called {event_recommended["event_type"]} .
-    
+
     Do not include humans in the image.
     """
 
