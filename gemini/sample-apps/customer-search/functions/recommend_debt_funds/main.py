@@ -76,9 +76,9 @@ def get_debt_fund_recommendation(request):
                                         {
                                             "text": "Market Summary",
                                             "image": {
-                                                "rawUrl": """https://upload.wikimedia.org/wikipedia/
-                                                commons/thumb/8/87/PDF_file_icon.svg/
-                                                391px-PDF_file_icon.svg.png"""
+                                                "rawUrl": "https://upload.wikimedia.org/wikipedia/"\
+                                                "commons/thumb/8/87/PDF_file_icon.svg/"\
+                                                "391px-PDF_file_icon.svg.png"
                                             },
                                             "anchor": {"href": url},
                                         },
