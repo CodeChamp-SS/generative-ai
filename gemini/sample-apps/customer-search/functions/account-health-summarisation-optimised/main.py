@@ -33,9 +33,7 @@ def get_financial_details(
     return 0
 
 
-def get_ac_health_status(
-    financial_details: dict
-) -> str:
+def get_ac_health_status(financial_details: dict) -> str:
     """
     Calculates the account health status based on financial details.
 
@@ -67,11 +65,14 @@ def get_ac_health_status(
     ):
         account_status = "Healthy"
     elif (
-        # (total_expenditure >= 0.75 * total_income and total_expenditure < 0.9 * total_income)
         (0.75 * total_income <= total_expenditure < 0.9 * total_income)
         or (0.1 * total_income < asset_amount < 0.2 * total_income)
         or (0.3 * asset_amount <= debt_amount < 0.75 * asset_amount)
-        or (0.3 * total_investment <= total_high_risk_investment < 0.8 * total_investment)
+        or (
+            0.3 * total_investment
+            <= total_high_risk_investment
+            < 0.8 * total_investment
+        )
     ):
         account_status = "Needs Attention"
     else:
@@ -96,11 +97,15 @@ def get_ac_details(project_id: str, user_accounts: list) -> tuple:
     total_expenditure = 0
     for account in user_accounts:
         query_expenditure_details = f"""
-            SELECT SUM(transaction_amount) as expenditure FROM `{project_id}.DummyBankDataset.AccountTransactions` WHERE ac_id = {account} AND debit_credit_indicator = 'Debit'
+        SELECT SUM(transaction_amount) as expenditure FROM \
+        `{project_id}.DummyBankDataset.AccountTransactions` \
+        WHERE ac_id = {account} AND debit_credit_indicator = 'Debit'
         """
 
         query_income = f"""
-            SELECT SUM(transaction_amount) as income FROM `{project_id}.DummyBankDataset.AccountTransactions` WHERE ac_id = {account} and debit_credit_indicator = 'Credit'
+        SELECT SUM(transaction_amount) as income FROM \
+        `{project_id}.DummyBankDataset.AccountTransactions` \
+        WHERE ac_id = {account} and debit_credit_indicator = 'Credit'
         """
 
         res_sub = run_all(
@@ -171,8 +176,12 @@ def account_health_summary(request):
         one_month_return.append(row["one_month_return"])
         ttm_return.append(row["TTM_Return"])
 
-    asset_amount = get_financial_details(query_str="query_assets", value_str="asset", res=res)
-    debt_amount = get_financial_details(query_str="query_debts", value_str="debt", res=res)
+    asset_amount = get_financial_details(
+        query_str="query_assets", value_str="asset", res=res
+    )
+    debt_amount = get_financial_details(
+        query_str="query_debts", value_str="debt", res=res
+    )
     first_name = ""
     total_investment = 0
     total_high_risk_investment = 0
@@ -211,14 +220,17 @@ def account_health_summary(request):
             "asset_amount": asset_amount,
             "debt_amount": debt_amount,
             "total_investment": total_investment,
-            "total_high_risk_investment": total_high_risk_investment
+            "total_high_risk_investment": total_high_risk_investment,
         }
     )
 
     model = Gemini()
 
-    gemini_prompt = f"""You are a chatbot for bank application and you are required to briefly summarize the key insights of given numerical values in small pointers.
-    You are provided with name, total income, total expenditure, total asset amount, total debt amount, total investment amount, high risk investments for the user in the following lines.
+    gemini_prompt = f"""You are a chatbot for bank application and you are required to briefly
+    summarize the key insights of given numerical values in small pointers.
+    You are provided with name, total income, total expenditure, total asset amount,
+    total debt amount, total investment amount, high risk investments for the user
+    in the following lines.
     {first_name},
     {total_income},
     {total_expenditure},
@@ -235,11 +247,13 @@ def account_health_summary(request):
     Write in a professional and business-neutral tone.
     The summary should be in a conversation-like manner based on the Account Status.
     The summary should only be based on the information presented above.
-    Avoid giving advice to the user for improving the Account Status, just include the information in short points.
+    Avoid giving advice to the user for improving the Account Status,
+    just include the information in short points.
     Don't comment on spendings of the person.
     The summary should be in pointers.
     The summary should fit in the word limit of 200.
-    The summary for account health is for Name to read. So summary should be in second person's perespective tone.
+    The summary for account health is for Name to read.
+    So summary should be in second person's perespective tone.
     For example the summary must look like :
     - Your account status is Healthy.
     - Your current balance is ₹65,00,000.00.
@@ -248,8 +262,10 @@ def account_health_summary(request):
     - You have invested ₹1,00,000.00 in high risk mutual funds.
 
     One_Month_Return and TTM_Return store the amounts in Indian currency, i.e., ₹.
-    If Total Investment is greater than 0: the following details must be mentioned in a uniformly formatted table:
-    For each element in Scheme_Name: mention the respective one month from One_Month_Return in ₹ and trailing twelve month returns from TTM_Return in ₹ in the table.
+    If Total Investment is greater than 0: the following details must be
+    mentioned in a uniformly formatted table:
+    For each element in Scheme_Name: mention the respective one month from One_Month_Return in ₹
+    and trailing twelve month returns from TTM_Return in ₹ in the table.
     """
 
     response = model.generate_response(gemini_prompt)

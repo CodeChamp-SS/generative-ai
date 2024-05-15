@@ -121,60 +121,60 @@ def translation_handler(request):
                 rag_qa_chain_json = rag_qa_chain_res.json()
                 headers = {"Access-Control-Allow-Origin": "*"}
                 return (rag_qa_chain_json, 200, headers)
+            else:
+                translated_text = translate_text(text, source_language_code, "en-US")
 
-            translated_text = translate_text(
-                text, source_language_code, "en-US"
-            )
-
-            rag_qa_chain_url = environ.get("RAG_QA_CHAIN_URL")
-            todo = {"query": translated_text}
-            rag_qa_chain_headers = {"Content-Type": "application/json"}
-            rag_qa_chain_res = requests.post(
-                rag_qa_chain_url,
-                data=json.dumps(todo),
-                headers=rag_qa_chain_headers,
-            )
-            rag_qa_chain_json = rag_qa_chain_res.json()
-            print(rag_qa_chain_json)
-
-            response = translate_fulfilment_response(
-                rag_qa_chain_json, "en-US", source_language_code
-            )
-
-            reference_list = []
-
-            for ref in json.loads(
-                rag_qa_chain_json["fulfillment_response"]["messages"][0]["text"]["text"][1]
-            ):
-                reference = {}
-                reference["matching_score"] = ref["matching_score"]
-                reference["document_source"] = ref["document_source"]
-                reference["document_name"] = translate_text(
-                    ref["document_name"],
-                    "en-US",
-                    source_language_code,
+                rag_qa_chain_url = environ.get("RAG_QA_CHAIN_URL")
+                todo = {"query": translated_text}
+                rag_qa_chain_headers = {"Content-Type": "application/json"}
+                rag_qa_chain_res = requests.post(
+                    rag_qa_chain_url,
+                    data=json.dumps(todo),
+                    headers=rag_qa_chain_headers,
                 )
-                reference["page_content"] = translate_text(
-                    ref["page_content"],
-                    "en-US",
-                    source_language_code,
+                rag_qa_chain_json = rag_qa_chain_res.json()
+                print(rag_qa_chain_json)
+
+                response = translate_fulfilment_response(
+                    rag_qa_chain_json, "en-US", source_language_code
                 )
-                reference_list.append(reference)
-            print(reference_list)
-            res_json = {
-                "fulfillment_response": {
-                    "messages": [
-                        {
-                            "text": {
-                                "text": [
-                                    response,
-                                    json.dumps(reference_list),
-                                ]
+
+                reference_list = []
+
+                for ref in json.loads(
+                    rag_qa_chain_json["fulfillment_response"]["messages"][0]["text"][
+                        "text"
+                    ][1]
+                ):
+                    reference = {}
+                    reference["matching_score"] = ref["matching_score"]
+                    reference["document_source"] = ref["document_source"]
+                    reference["document_name"] = translate_text(
+                        ref["document_name"],
+                        "en-US",
+                        source_language_code,
+                    )
+                    reference["page_content"] = translate_text(
+                        ref["page_content"],
+                        "en-US",
+                        source_language_code,
+                    )
+                    reference_list.append(reference)
+                print(reference_list)
+                res_json = {
+                    "fulfillment_response": {
+                        "messages": [
+                            {
+                                "text": {
+                                    "text": [
+                                        response,
+                                        json.dumps(reference_list),
+                                    ]
+                                }
                             }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
             # Set CORS headers for the main request
             headers = {"Access-Control-Allow-Origin": "*"}
 

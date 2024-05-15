@@ -7,7 +7,6 @@ from os import environ
 import functions_framework
 from google.cloud import bigquery
 import requests
-
 from utils.bq_query_handler import BigQueryHandler
 from utils.gemini import Gemini
 
@@ -83,11 +82,12 @@ def find_nearest_bike_dealer(request):
         )
 
     distances = []
-    for brand in car_dealers:
+    for brand in car_dealers.items():
         for dealer_name, dealer_address in car_dealers[brand]:
             dist_api_url = (
-                f"https://maps.googleapis.com/maps/api/distancematrix/json?destinations={dealer_name},"
-                f" {dealer_address}&origins={cust_address}&key={api_key}"
+                f"""https://maps.googleapis.com/maps/api/distancematrix/json?\
+                destinations={dealer_name}, \
+                {dealer_address}&origins={cust_address}&key={api_key}"""
             )
             dist_res = requests.get(dist_api_url, headers=headers)
             dist_res_json = dist_res.json()

@@ -10,9 +10,8 @@ import re
 
 import functions_framework
 from google.cloud import bigquery
-
-from utils.gemini import Gemini
 from utils.bq_query_handler import BigQueryHandler
+from utils.gemini import Gemini
 
 project_id = environ.get("PROJECT_ID")
 
@@ -26,7 +25,7 @@ def get_ac_number():
     """
 
     account_number = "11000"
-    for i in range(5):
+    for _ in range(5):
         account_number += str(random.randint(0, 9))
 
     return int(account_number)
@@ -83,7 +82,8 @@ def get_number_of_days(fd_tenure):
 
 def get_interest_rate(is_sr_citizen, number_of_days):
     """
-    Gets the interest rate for a fixed deposit based on the tenure and whether the customer is a senior citizen.
+    Gets the interest rate for a fixed deposit based on the tenure and whether the customer
+    is a senior citizen.
 
     Args:
       is_sr_citizen: A boolean indicating whether the customer is a senior citizen.

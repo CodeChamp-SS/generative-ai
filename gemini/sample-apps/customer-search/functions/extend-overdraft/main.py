@@ -6,7 +6,6 @@ from os import environ
 
 import functions_framework
 from google.cloud import bigquery
-
 from utils.gemini import Gemini
 
 project_id = environ.get("PROJECT_ID")
@@ -67,8 +66,7 @@ def extend_overdraft(request):
         min_interest_rate = row["min_interest_rate"]
         min_processing_fee = row["min_processing_fee"]
 
-    model = Gemini()
-    response = model.generate_response(
+    response = Gemini().generate_response(
         f"""
           You have to offer an overdraft of {overdraft_amount} to a user at a interest rate of
           {overdraft_interest_rate}% with a processing fee of {overdraft_processing_fee}
