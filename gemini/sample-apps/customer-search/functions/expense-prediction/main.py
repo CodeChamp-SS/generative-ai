@@ -35,7 +35,7 @@ def create_graph(amount, category, date, cust_id):
     pio.templates.default = "plotly_white"
 
     lst = []
-    for i in range(len(amount)):
+    for i in enumerate(amount):
         if category[i] != "Healthcare":
             lst.append(
                 [
@@ -83,10 +83,11 @@ def create_aggregate_transaction_table():
 
     client = bigquery.Client()
     query = f"""
-      SELECT ac_id, DATE_TRUNC(date, MONTH) AS month_year ,sub_category,category,sum(transaction_amount) as transaction_amount
-      FROM `{project_id}.DummyBankDataset.AccountTransactions`
-      WHERE debit_credit_indicator = 'Debit'
-      GROUP BY ac_id,sub_category,category, month_year
+    SELECT ac_id, DATE_TRUNC(date, MONTH) AS month_year,sub_category,category,\
+    sum(transaction_amount) as transaction_amount \
+    FROM `{project_id}.DummyBankDataset.AccountTransactions` \
+    WHERE debit_credit_indicator = 'Debit' \
+    GROUP BY ac_id,sub_category,category, month_year
     """
 
     job_config = bigquery.QueryJobConfig()
@@ -116,15 +117,15 @@ def train_model():
 
     client = bigquery.Client()
     query_train_arima = f"""
-    CREATE OR REPLACE MODEL
-    `{project_id}.ExpensePrediction.expense_prediction_model` OPTIONS(MODEL_TYPE='ARIMA_PLUS',
-    TIME_SERIES_TIMESTAMP_COL='month_year',
-    TIME_SERIES_DATA_COL='transaction_amount',
-    TIME_SERIES_ID_COL=['ac_id','category','sub_category'],
-    HOLIDAY_REGION='in') AS
-    SELECT
-      month_year, transaction_amount, ac_id, category,sub_category
-    FROM
+    CREATE OR REPLACE MODEL \
+    `{project_id}.ExpensePrediction.expense_prediction_model` OPTIONS(MODEL_TYPE='ARIMA_PLUS',\
+    TIME_SERIES_TIMESTAMP_COL='month_year',\
+    TIME_SERIES_DATA_COL='transaction_amount',\
+    TIME_SERIES_ID_COL=['ac_id','category','sub_category'],\
+    HOLIDAY_REGION='in') AS \
+    SELECT \
+    month_year,transaction_amount,ac_id,category,sub_category \
+    FROM \
     `{project_id}.ExpensePrediction.training_data`
     """
     job = client.query(query_train_arima)
@@ -144,12 +145,13 @@ def create_predicted_expense_table(customer_id):
 
     client = bigquery.Client()
     query = f"""
-    SELECT
-    ac_id, category, sub_category, forecast_timestamp as date, forecast_value as transaction_amount
-    FROM
-      ML.FORECAST(MODEL `{project_id}.ExpensePrediction.expense_prediction_model`,
-        STRUCT(3 AS horizon))
-    WHERE ac_id IN (SELECT account_id FROM `{project_id}.DummyBankDataset.Account` where customer_id={customer_id})
+    SELECT \
+    ac_id, category, sub_category, forecast_timestamp as date, forecast_value as \
+    transaction_amount FROM \
+    ML.FORECAST(MODEL `{project_id}.ExpensePrediction.expense_prediction_model`,\
+    STRUCT(3 AS horizon)) \
+    WHERE ac_id IN (SELECT account_id FROM `{project_id}.DummyBankDataset.\
+    Account` where customer_id={customer_id})
     """
 
     job_config = bigquery.QueryJobConfig()
@@ -192,13 +194,13 @@ def expense_prediction(request):
     client = bigquery.Client()
     customer_id = request_json["sessionInfo"]["parameters"]["cust_id"]
 
-    """
-    1. Aggregate the transaction data
-    2. Train the model
-    3. Forecast the expenses
-    4. Create a graph
-    5. Return the graph as webhook response
-    """
+    # """
+    # 1. Aggregate the transaction data
+    # 2. Train the model
+    # 3. Forecast the expenses
+    # 4. Create a graph
+    # 5. Return the graph as webhook response
+    # """
 
     # UNCOMMENT THE FOLLOWING TO TRAIN THE MODEL
     # create_aggregate_transaction_table()
@@ -227,7 +229,7 @@ def expense_prediction(request):
                 row["transaction_amount"], 2
             )
 
-    for k in total_expenditure:
+    for k in total_expenditure.items():
         total_expenditure_str = (
             total_expenditure_str
             + f"Total predicted expenses in {k}: {total_expenditure[k]}"
@@ -316,7 +318,7 @@ def expense_prediction(request):
     response2 = model.generate_response(format_date_prompt)
 
     # create a graph out of the data
-    rawUrl = create_graph(amount, category, date, customer_id)
+    raw_url = create_graph(amount, category, date, customer_id)
 
     if len(payment_list) > 1:
         custom_payload = [
@@ -326,7 +328,7 @@ def expense_prediction(request):
                         [
                             {
                                 "type": "image",
-                                "rawUrl": rawUrl,
+                                "raw_url": raw_url,
                                 "accessibilityText": (
                                     "Your predicted expenses bases on transaction"
                                     " history for Oct-Dec 23"
@@ -354,7 +356,7 @@ def expense_prediction(request):
                         [
                             {
                                 "type": "image",
-                                "rawUrl": rawUrl,
+                                "raw_url": raw_url,
                                 "accessibilityText": (
                                     "Your predicted expenses bases on transaction"
                                     " history for Oct-Dec 23"

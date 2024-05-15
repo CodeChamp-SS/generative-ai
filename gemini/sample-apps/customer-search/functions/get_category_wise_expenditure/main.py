@@ -89,11 +89,11 @@ def category_wise_expenditure(request):
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
 
     # Uploading pie chart to cloud bucket
-    id = uuid.uuid4()
-    BUCKET_NAME = environ.get("PUBLIC_BUCKET_NAME")
-    SOURCE_FILE_NAME = fig.to_image(format="png")
-    DESTINATION_FILE_NAME = f"pie_chart_{id}"
-    url = upload_blob(BUCKET_NAME, SOURCE_FILE_NAME, DESTINATION_FILE_NAME)
+    uid = uuid.uuid4()
+    bucket_name = environ.get("PUBLIC_BUCKET_NAME")
+    source_file_name = fig.to_image(format="png")
+    destination_file_name = f"pie_chart_{uid}"
+    url = upload_blob(bucket_name, source_file_name, destination_file_name)
 
     # Returning response as image
     res = {

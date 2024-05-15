@@ -36,9 +36,9 @@ def debt_funds_summary(request):
     if not cust_id_exists:
         return res
 
-    PUBLIC_BUCKET = environ.get("PUBLIC_BUCKET")
-    MARKET_SUMM_DOC = environ.get("MARKET_SUMM_DOC")
-    url = "https://storage.cloud.google.com/" + PUBLIC_BUCKET + "/" + MARKET_SUMM_DOC
+    public_bucket = environ.get("public_bucket")
+    market_sum_doc = environ.get("market_sum_doc")
+    url = "https://storage.cloud.google.com/" + public_bucket + "/" + market_sum_doc
 
     resp = (
         "Debt Funds gave a TTM return of 6%. Returns on liquid funds have been"
@@ -69,7 +69,9 @@ def debt_funds_summary(request):
                                         {
                                             "text": "Market Summary",
                                             "image": {
-                                                "rawUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/391px-PDF_file_icon.svg.png"
+                                                "rawUrl": "https://upload.wikimedia.org/\
+                                                    wikipedia/commons/thumb/8/87/\
+                                                    PDF_file_icon.svg/391px-PDF_file_icon.svg.png"
                                             },
                                             "anchor": {"href": url},
                                         },
